@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
 
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
@@ -37,10 +37,11 @@ public class AuthenticationService {
         this.userRepository.save(user);
 
         var jwtToken = jwtUtil.generateToken(user);
-        return new AuthenticationResponse(jwtToken);
+        return new AuthenticationResponse(request.getFirstName() + " "+ request.getLastName() , jwtToken);
     }
 
     public AuthenticationResponse login(AuthenticationRequest request) {
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -49,8 +50,9 @@ public class AuthenticationService {
         );
 
         var user = this.userRepository.findByEmail(request.getEmail()).orElseThrow();
+
         var jwtToken = jwtUtil.generateToken(user);
 
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return new AuthenticationResponse(user.getFirstName() + " "+ user.getLastName() , jwtToken);
     }
 }
